@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - GENERIC_TIMEZONE=Asia/Kathmandu
+    volumes:
+      - ./n8n-data:/home/node/.n8n
+
+  python-worker:
+    image: python:3.11-slim
+    container_name: python-worker
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH}
+      - GOOGLE_TOKEN_PATH=${GOOGLE_TOKEN_PATH}
+      - SPREADSHEET_ID=${SPREADSHEET_ID}
+      - DRIVE_FOLDER_ID=${DRIVE_FOLDER_ID}
+    command: >
+      sh -c "pip install -r requirements.txt -q &&
+             python -m flask --app pipeline.server run --host=0.0.0.0 --port=5000"
+
+  dashboard:
+    image: python:3.11-slim
+    container_name: dashboard
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GOOGLE_CREDENTIALS_PATH=${GOOGLE_CREDENTIALS_PATH}
+      - GOOGLE_TOKEN_PATH=${GOOGLE_TOKEN_PATH}
+      - SPREADSHEET_ID=${SPREADSHEET_ID}
+      - DRIVE_FOLDER_ID=${DRIVE_FOLDER_ID}
+    command: >
+      sh -c "pip install -r requirements.txt -q &&
+             streamlit run dashboard/app.py --server.port=8501 --server.address=0.0.0.0"

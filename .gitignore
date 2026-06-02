@@ -1,0 +1,23 @@
+# Environment
+.env
+
+# Google credentials
+credentials/oauth_credentials.json
+credentials/token.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+
+# Virtual environment (if added later)
+venv/
+.venv/
+
+# n8n data
+n8n-data/
+
+# Streamlit
+.streamlit/
